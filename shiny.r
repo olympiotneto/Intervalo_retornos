@@ -198,6 +198,16 @@ ui <- dashboardPage(
           step = 0.5
         ),
         
+        # Taxa de Juros
+        numericInput(
+          "Selic",
+          "Taxa Selic Anual (%):",
+          value = 6,
+          min = -100,
+          max = 100,
+          step = 0.25
+        ),
+        
         # Botão de atualizar
         br(),
         actionButton(
@@ -733,7 +743,7 @@ server <- function(input, output, session) {
             
             # Sharpe Ratio
             tryCatch({
-              sharpe_result <- SharpeRatio(stats_xts, Rf = 0, FUN = "StdDev")
+              sharpe_result <- SharpeRatio(stats_xts, Rf = input$Selic*input$nro_dias/25200, FUN = "StdDev")
               sharpe <- as.numeric(sharpe_result[1])
             }, error = function(e) {
               sharpe <- NA
@@ -823,7 +833,7 @@ server <- function(input, output, session) {
                 style = "margin-bottom: 15px;",
                 tags$h5(
                   # tags$icon("balance-scale"),
-                  " Sharpe Ratio:"
+                  paste0(" Sharpe Ratio (Selic: ",input$Selic,"% a.a.):")
                 ),
                 tags$h4(
                   round(sharpe, 3),
