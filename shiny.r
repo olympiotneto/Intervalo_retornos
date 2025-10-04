@@ -9,6 +9,8 @@ library(DT)
 library(PerformanceAnalytics)
 library(xts)
 
+options(OutDec = ",")
+
 # ==========================================
 # FUNÇÕES AUXILIARES (Backend)
 # ==========================================
@@ -604,10 +606,10 @@ server <- function(input, output, session) {
     DT::datatable(
       tab_freq,
       options = list(
-        pageLength = 10,
-        dom = 't',
-        scrollY = "300px",
-        scrollCollapse = TRUE
+        pageLength = 5
+        # dom = 't',
+        # scrollY = "300px",
+        # scrollCollapse = TRUE
       ),
       rownames = FALSE
     ) %>%
@@ -697,13 +699,15 @@ server <- function(input, output, session) {
     # browser()
     if (length(returns_clean) > 0) {
       # Calcular VaR e CVaR
-      var_95 <- quantile(returns_clean, 0.05, na.rm = TRUE) * 100
-      returns_below_var <- returns_clean[returns_clean <= quantile(returns_clean, 0.05, na.rm = TRUE)]
-      cvar_95 <- if (length(returns_below_var) > 0) {
-        mean(returns_below_var, na.rm = TRUE) * 100
-      } else {
-        NA
-      }
+      # var_95 <- quantile(returns_clean, 0.05, na.rm = TRUE) * 100
+      var_95 <- VaR(R = returns_clean , method = "modified") * 100 
+      # returns_below_var <- returns_clean[returns_clean <= var_95 / 100]
+      # cvar_95 <- if (length(returns_below_var) > 0) {
+      #   mean(returns_below_var, na.rm = TRUE) * 100
+      # } else {
+      #   NA
+      # }
+      cvar_95 <- CVaR(R = returns_clean , method = "modified") * 100
       # Preparar série temporal para outras métricas
       stats_xts <- NULL
       max_dd <- NA
@@ -722,13 +726,15 @@ server <- function(input, output, session) {
             x = df_for_xts$return_d,
             order.by = df_for_xts$date
           )
-          
+          # browser()
           # Calcular métricas se temos dados suficientes
           if (length(stats_xts) > 1) {
             # MaxDrawdown
             tryCatch({
-              dd_result <- maxDrawdown(stats_xts)
-              max_dd <- as.numeric(dd_result) * 100
+              # dd_result <- maxDrawdown(stats_xts)
+              # max_dd <- as.numeric(dd_result) * 100
+              max_dd <- maxDrawdown(stats_xts) |> 
+                scales::percent(accuracy = 0.01, decimal.mark = ",")
             }, error = function(e) {
               max_dd <- NA
             })
@@ -802,8 +808,9 @@ server <- function(input, output, session) {
                   " Drawdown Máximo:"
                 ),
                 tags$h4(
-                  paste0(round(max_dd, 2), "%"),
-                  class = if(max_dd > 20) "text-danger" else if(max_dd > 10) "text-warning" else "text-success"
+                  # paste0(round(max_dd, 2), "%"),
+                  max_dd,
+                  class = if(max_dd > 0.2) "text-danger" else if(max_dd > .10) "text-warning" else "text-success"
                 )
               )
             } else {
