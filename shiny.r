@@ -190,14 +190,34 @@ ui <- dashboardPage(
           step = 1
         ),
         
+        # Valor alvo
+        numericInput(
+          "valor_inicial",
+          "Valor inicial (R$):",
+          value = 1.00,
+           min = NA,
+           max = NA,
+          step = 0.01
+        ),
+
+        # Valor alvo
+        numericInput(
+          "valor_final",
+          "Valor final (R$):",
+          value = 1.00,
+          min = NA,
+          max = NA,
+          step = 0.01
+        ),
+        
         # Meta de retorno
         numericInput(
           "meta_retorno",
           "Meta de Retorno (%):",
-          value = -2,
-          min = -100,
-          max = 100,
-          step = 0.5
+          value = 1.00,
+          min = NA,
+          max = NA,
+          step = 0.01
         ),
         
         # Taxa de Juros
@@ -205,8 +225,8 @@ ui <- dashboardPage(
           "Selic",
           "Taxa Selic Anual (%):",
           value = 6,
-          min = -100,
-          max = 100,
+          min = -100.00,
+          max = 100.00,
           step = 0.25
         ),
         
@@ -368,7 +388,36 @@ server <- function(input, output, session) {
 
   })
   
+  # faz os cálculos da meta de retorno reativo
+  retorno <-  reactive({
+    req(input$valor_inicial, input$valor_final)
 
+    v1 <- input$valor_inicial
+    v2 <- input$valor_final
+    retorno <- ((v2/v1)-1)*100
+    return(retorno)
+
+  })
+  #
+  # #Observa alteração nos inputs
+  #
+  observeEvent(c(input$valor_inicial, input$valor_final), {
+
+    valor <- retorno()
+    
+    updateNumericInput(
+      session, 
+      inputId = "meta_retorno", 
+      value = valor |> 
+        scales::number(accuracy = 0.01),
+      min = NA,
+      max = NA,
+      step = 0.01
+    )
+  },
+  ignoreInit = TRUE
+  )
+  
   
   # Processar dados quando botão é clicado
   observeEvent(input$update, {
@@ -388,8 +437,6 @@ server <- function(input, output, session) {
     if (!is.null(values$dados)) {
       showNotification("Dados atualizados com sucesso!", type = "message")
     }
-    
-   
     
   })
   
@@ -726,7 +773,7 @@ server <- function(input, output, session) {
             x = df_for_xts$return_d,
             order.by = df_for_xts$date
           )
-          # browser()
+           # browser()
           # Calcular métricas se temos dados suficientes
           if (length(stats_xts) > 1) {
             # MaxDrawdown
