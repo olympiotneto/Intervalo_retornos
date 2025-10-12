@@ -801,6 +801,14 @@ server <- function(input, output, session) {
             }, error = function(e) {
               sharpe <- NA
             })
+            
+            # Sharpe Ratio ajustado
+            tryCatch({
+              sharpe_ajus_result <- AdjustedSharpeRatio(stats_xts, Rf = input$Selic*input$nro_dias/25200)
+              sharpe_ajus <- as.numeric(sharpe_ajus_result[1])
+            }, error = function(e) {
+              sharpe <- NA
+            })
           }
         }
       }, error = function(e) {
@@ -897,6 +905,23 @@ server <- function(input, output, session) {
             } else {
               tags$div()
             },
+         
+         # Sharpe Ratio ajustado
+         if (!is.na(sharpe) && !is.infinite(sharpe)) {
+           tags$div(
+             style = "margin-bottom: 15px;",
+             tags$h5(
+               # tags$icon("balance-scale"),
+               paste0(" Sharpe Ratio Ajustado (Selic: ",input$Selic,"% a.a.):")
+             ),
+             tags$h4(
+               round(sharpe_ajus, 3),
+               class = if(sharpe < 0) "text-danger" else if(sharpe > 1) "text-success" else "text-info"
+             )
+           )
+         } else {
+           tags$div()
+         },
 
             tags$hr(),
             tags$small(
