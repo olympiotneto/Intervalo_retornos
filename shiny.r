@@ -211,6 +211,9 @@ ui <- dashboardPage(
         ),
         
         # Meta de retorno
+        tags$style("#meta_retorno { background-color: steelblue; 
+                   color: white; 
+                   font-weight: bold; }"),
         numericInput(
           "meta_retorno",
           "Meta de Retorno (%):",
