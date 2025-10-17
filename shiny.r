@@ -609,7 +609,8 @@ server <- function(input, output, session) {
     
     p <- p %>% layout(
       title = list(text = "Evolução dos Retornos ao Longo do Tempo"),
-      xaxis = list(title = "Data", 
+      xaxis = list(title = "Data",
+                   tickformat = "%m/%Y",
                    rangeslider = list(visible = TRUE),
                    gridcolor = 'rgb(230, 230, 230)'),
       yaxis = list(title = "Retorno (%)", gridcolor = 'rgb(230, 230, 230)'),
