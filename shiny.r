@@ -393,25 +393,23 @@ server <- function(input, output, session) {
   
   # faz os cálculos da meta de retorno reativo
   retorno <-  reactive({
-    req(input$valor_inicial, input$valor_final)
-
     v1 <- input$valor_inicial
     v2 <- input$valor_final
     retorno <- ((v2/v1)-1)*100
     return(retorno)
+    }) |> 
+    bindEvent(c(input$valor_inicial, input$valor_final))
 
-  })
-  #
-  # #Observa alteração nos inputs
-  #
+  #Observa alteração nos inputs
+
   observeEvent(c(input$valor_inicial, input$valor_final), {
 
     valor <- retorno()
-    
+
     updateNumericInput(
-      session, 
-      inputId = "meta_retorno", 
-      value = valor |> 
+      session,
+      inputId = "meta_retorno",
+      value = valor |>
         scales::number(accuracy = 0.01),
       min = NA,
       max = NA,
@@ -420,6 +418,8 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE
   )
+
+  
   
   
   # Processar dados quando botão é clicado
@@ -444,9 +444,11 @@ server <- function(input, output, session) {
   })
   
   #Grava o none reativo do papel parea usar quando clicar no botao
-  papel_kpi <- eventReactive(input$update, {
-   return(values$ativo_usado)
-  })
+  
+  papel_kpi <- reactive({
+    return(values$ativo_usado)
+  }) |> 
+    bindEvent(input$update)
   
   # KPIs - Value Boxes
   output$box_prob <- renderValueBox({
