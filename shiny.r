@@ -165,7 +165,7 @@ ui <- dashboardPage(
         # Ou entrada manual
         textInput(
           "ativo_manual",
-          "Ou digite o código (ex: VALE3.SA):",
+          "Ou digite o código (ex: VALE3):",
           value = ""
         ),
         
@@ -381,10 +381,11 @@ server <- function(input, output, session) {
     ativo_usado = NULL
   )
   
+ 
   # Determinar qual ativo usar
   observe({
     if (input$ativo_manual != "") {
-      values$ativo_usado <- input$ativo_manual
+      values$ativo_usado <- glue::glue("{toupper(input$ativo_manual)}.SA") 
     } else {
       values$ativo_usado <- input$ativo
     }
