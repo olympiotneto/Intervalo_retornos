@@ -458,6 +458,8 @@ server <- function(input, output, session) {
     prob <- values$dados %>%
       summarise(prob = sum(return_d <= (input$meta_retorno/100)) / n()) %>%
       pull(prob)
+
+
   
   #Pega o nome do ativo após apertar o botão
     
@@ -487,11 +489,12 @@ server <- function(input, output, session) {
   output$box_volatilidade <- renderValueBox({
     req(values$dados)
     
-    vol <- sd(values$dados$return_d, na.rm = TRUE)
+  vol <- sd(values$dados$return_d, na.rm = TRUE)
+
     
     valueBox(
       value = paste0(scales::percent(vol, accuracy = 0.01, decimal.mark = "," )),
-      subtitle = "Volatilidade",
+      subtitle = paste0("Volatilidade média diária em ",input$nro_dias, " dias"),
       icon = icon("chart-area"),
       color = if (vol > 10) "green" else if (vol > 5) "yellow" else "red"
     )
